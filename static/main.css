@@ -1,0 +1,32 @@
+.form-container{
+  width: 230px;
+}
+.form-element {
+  width: 220px;
+  display: block;
+  margin: 0 auto;
+}
+.braintree-hosted-container, .form-input {
+  height: 20px;
+  background-color: #C8D6E8;
+  border-style: groove;
+  border-color: transparent;
+  border-radius: 5px;
+}
+.braintree-hosted-fields-invalid {
+  border-style: groove;
+  border-color: tomato;
+}
+.braintree-hosted-fields-valid {
+  border-style: groove;
+  border-color: mediumslateblue;
+}
+p, h3, .message, .form-element {
+  font-family: monospace;
+}
+input {
+  background-color: inherit;
+  font-family: inherit;
+  border-style: none;
+  height: inherit;
+}
