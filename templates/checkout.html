@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <style>
+    .form-container{
+      width: 230px;
+    }
+    .form-element {
+      width: 220px;
+      display: block;
+      margin: 0 auto;
+    }
+    .braintree-hosted-container, .form-input {
+      height: 20px;
+      background-color: #C8D6E8;
+      border-style: groove;
+      border-color: transparent;
+      border-radius: 5px;
+    }
+    .braintree-hosted-fields-invalid {
+      border-style: groove;
+      border-color: tomato;
+    }
+    .braintree-hosted-fields-valid {
+      border-style: groove;
+      border-color: mediumslateblue;
+    }
+    p, h3, .message, .form-element {
+      font-family: monospace;
+    }
+    input {
+      background-color: inherit;
+      font-family: inherit;
+      border-style: none;
+      height: inherit;
+    }
+  </style>
+
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/client.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/hosted-fields.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">; -->
+
+</head>
+
+<body>
+
+  <h3>Welcome to Hosted Fields with Braintree v3!</h3>
+  <br />
+
+  <div class="form-container">
+    <div id="message" class="message form-element"></div>
+    <br />
+
+
+    <p>
+      <div class="form-element form-input">$<input id="amount" placeholder="Amount"></div>
+    </p>
+    <p>
+      <div id="card-number" class="braintree-hosted-container form-element"></div>
+    </p>
+    <p>
+      <div id="expiration-date" class="braintree-hosted-container form-element"></div>    
+    </p>
+    <p>
+      <div id="cvv" class="braintree-hosted-container form-element"></div>
+    </p>
+    <p>
+      <div id="postal-code" class="braintree-hosted-container form-element"></div>
+    </p>
+
+    <button id="submitter" class="form-element" disabled="true">Submit</button>
+  </div>
+
+
+  <script>
+
+    var submitter = $("#submitter");
+    var messenger = $(".message");
+    var output = "No message."
+
+    function nonceHandler(nonce, amount) {
+      $.ajax({
+        url: "/create_transaction",
+        data: {
+          nonce: nonce,
+          amount: amount,
+        },
+        type: "POST",
+        dataType: "text",
+      })
+      .done(function(response) {
+        // get info from response, display
+        output = response;
+      })
+      .fail(function(xhr, status, errorThrown) {
+        output = "An error occurred. Please refresh the page and try again.";
+        console.log(xhr);
+        console.log("Error: " + errorThrown + " Status: " + status);
+      })
+      .always(function(xhr, status) {
+        console.log("Request made and completed.");
+        messenger.text(output);
+      });
+    }
+
+    braintree.client.create({
+      authorization: "{{ client_token }}"
+    }, function (err, braintreeClientInstance) {
+      // Braintree client...
+      if (err) {
+        console.log(JSON.stringify(err));
+        return;
+      }
+      // ...is good to go.
+      console.log("Braintree client created.");
+      // Create Hosted Fields:
+      braintree.hostedFields.create({
+        client: braintreeClientInstance,
+        styles: {
+          "input": {"font-family": "monospace"},
+        },
+        fields: {
+          number: {selector: "#card-number", placeholder: "Credit Card Number"},
+          cvv: {selector: "#cvv", placeholder: "CVV"},
+          expirationDate: {selector: "#expiration-date", placeholder: "MM/YY or MM/YYYY"},
+          postalCode: {selector: "#postal-code", placeholder: "Zip Code"},
+        },
+      }, function (err, hostedFieldsInstance) {
+        // Hosted Fields...
+        if (err) {
+          console.log(JSON.stringify(err));
+          return;
+        }
+        // ...is good to go:
+        console.log("Hosted fields have been initialized.");
+        // undisable the submitter, and add a function to it to tokenize and invoke nonceHandler
+        // submitter.removeAttribute("disabled")
+        submitter.prop("disabled", false);
+        submitter.click(function() {
+          messenger.text("Working...")
+          hostedFieldsInstance.tokenize(function (err, payload) {
+            if (err) {
+              // messenger.text(err.message + ".");
+              console.log(JSON.stringify(err));
+              return;
+            }
+            console.log(JSON.stringify(payload));
+            var amount = $("#amount").val();
+            // var amount = "22.00";
+            nonceHandler(payload.nonce, amount);
+          });
+        });
+
+      });
+
+    });
+
+  </script>
+
+
+</body>
