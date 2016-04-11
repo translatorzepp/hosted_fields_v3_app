@@ -15,20 +15,20 @@ def get_client_token():
 	client_token = braintree.ClientToken.generate()
 	# return "Hello world, we have a client token: " + client_token
 	return render_template('checkout.html', client_token=client_token)
-# def hello_world():
-#     return 'Hello World!'
 
 @app.route("/create_transaction", methods=["POST"])
 def create_transaction():
 	nonce = request.form["nonce"]
 	amount = request.form["amount"]
+	devdat = request.form["device_data"]
 
 	result = braintree.Transaction.sale({
 		"amount": amount,
 		"payment_method_nonce": nonce,
 		"options": {
 			"submit_for_settlement": True
-		}
+		},
+		"device_data": devdat,
 	})
 
 	if result.is_success:
