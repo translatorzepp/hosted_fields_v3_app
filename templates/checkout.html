@@ -5,6 +5,7 @@
 
   <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/client.min.js"></script>
   <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/hosted-fields.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/data-collector.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
@@ -18,7 +19,6 @@
   <div class="form-container">
     <div id="message" class="message form-element"></div>
     <br />
-
 
     <p>
       <div class="form-element form-input">$<input id="amount" placeholder="Amount" style="width:210px"></div>
@@ -46,12 +46,18 @@
     var messenger = $(".message");
     var output = "No message."
 
+    var deviceDataCollected = "This is not device data."
+
+    // Function to collect transaction params, incl. the nonce,
+    // post them to the server endpoint,
+    // and retrieve and display results.
     function nonceHandler(nonce, amount) {
       $.ajax({
         url: "/create_transaction",
         data: {
           nonce: nonce,
           amount: amount,
+          device_data: deviceDataCollected,
         },
         type: "POST",
         dataType: "text",
@@ -71,6 +77,7 @@
       });
     }
 
+    // Braintree Code:
     braintree.client.create({
       authorization: "{{ client_token }}"
     }, function (err, braintreeClientInstance) {
@@ -81,6 +88,22 @@
       }
       // ...is good to go.
       console.log("Braintree client created.");
+      // Create Data Collector:
+      braintree.dataCollector.create({
+        kount: {
+          environment: 'sandbox',
+          // paypal: true,
+        }
+      }, function (err, data) {
+        if (err) {
+          console.log(JSON.stringify(err));
+          deviceDataCollected = "This is not device data because there was a problem: " + JSON.stringify(err);
+          return;
+        }
+        // Data collector is good to go:
+        deviceDataCollected = data.deviceData;
+        console.log("Device data captured: " + deviceDataCollected);
+      });
       // Create Hosted Fields:
       braintree.hostedFields.create({
         client: braintreeClientInstance,
@@ -113,9 +136,7 @@
               return;
             }
             console.log(JSON.stringify(payload));
-            var amount = $("#amount").val();
-            // var amount = "22.00";
-            nonceHandler(payload.nonce, amount);
+            nonceHandler(payload.nonce, $("#amount").val());
           });
         });
 
