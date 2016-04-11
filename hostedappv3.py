@@ -2,10 +2,10 @@ from flask import Flask, render_template, request
 import braintree
 
 app = Flask(__name__)
-
+merchant_id = "ryqy4yyw7m5bf92h"
 braintree.Configuration.configure(
     braintree.Environment.Sandbox,
-    merchant_id = "ryqy4yyw7m5bf92h",
+    merchant_id = merchant_id,
     public_key = "ymtqgy8773zq2fw3",
     private_key = "7dd7253c4c53d675f15e869212659579"
 )
@@ -29,12 +29,15 @@ def create_transaction():
 			"submit_for_settlement": True
 		},
 		"device_data": devdat,
+		"descriptor": {
+			"name": "HostedFields*JSv3",
+		},
 	})
 
 	if result.is_success:
 		return "Victory! Transaction ID: " + result.transaction.id
 	else:
-		return "Failure! Try again."
+		return "Failure! Try again. " + result.message
 	# return "Victory! We got a nonce (" + nonce + ") and an amount (" + amount + ")!"
 
 if __name__ == '__main__':
