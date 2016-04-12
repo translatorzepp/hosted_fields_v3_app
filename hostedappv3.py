@@ -25,7 +25,7 @@ def get_client_token():
 	# return "Hello world, we have a client token: " + client_token
 	return render_template('checkout.html', client_token=client_token)
 
-@app.route("/create_transaction", methods=["POST"])
+@app.route('/create_transaction', methods=["POST"])
 def create_transaction():
 	nonce = request.form["nonce"]
 	amount = request.form["amount"]
@@ -43,12 +43,11 @@ def create_transaction():
 		},
 	})
 
+	# return "Victory! We got a nonce (" + nonce + ") and an amount (" + amount + ")!"
 	if result.is_success:
 		return "Victory! Transaction ID: " + result.transaction.id
 	else:
 		return "Failure! Try again. " + result.message
-	# return "Victory! We got a nonce (" + nonce + ") and an amount (" + amount + ")!"
 
 if __name__ == '__main__':
-	
 	app.run('127.0.0.1', debug=True, port=5000, ssl_context=tls_context)
