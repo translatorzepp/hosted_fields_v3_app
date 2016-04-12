@@ -2,6 +2,12 @@ from flask import Flask, render_template, request
 import braintree
 
 app = Flask(__name__)
+
+# from OpenSSL import ssl
+# tls_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+# context.load_cert_chain('yourserver.crt', 'yourserver.key')
+tls_context = "adhoc"
+
 merchant_id = "ryqy4yyw7m5bf92h"
 braintree.Configuration.configure(
     braintree.Environment.Sandbox,
@@ -42,4 +48,6 @@ def create_transaction():
 
 if __name__ == '__main__':
 	app.debug = True
-	app.run()
+	app.ssl_context = tls_context
+	# app.run()
+	app.run('127.0.0.1', debug=True, port=5000, ssl_context='adhoc')
