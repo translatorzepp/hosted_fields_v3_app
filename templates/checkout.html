@@ -3,10 +3,10 @@
 
 <head>
 
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/client.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/hosted-fields.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/data-collector.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.3/js/paypal.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.9/js/client.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.9/js/hosted-fields.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.9/js/data-collector.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.9/js/paypal.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
@@ -48,6 +48,8 @@
 
 
   <script>
+
+    var hostedFields;
 
     var submitter = $("#submitter");
     var messenger = $(".message");
@@ -132,6 +134,7 @@
           return;
         }
         // ...is good to go:
+        hostedFields = hostedFieldsInstance;
         console.log("Hosted fields have been initialized.");
         // undisable the submit button, and add a function to it to tokenize and invoke nonceHandler
         // submitter.removeAttribute("disabled")
@@ -152,10 +155,6 @@
       // Create PayPal:
       braintree.paypal.create({
         client: braintreeClientInstance,
-        flow: "vault",
-        // amount: "10",
-        // currency: "USD",
-        enableShippingAddress: true,
       }, function (err, paypalInstance) {
         // PayPal...
         if (err) {
@@ -167,7 +166,12 @@
         console.log("PayPal has been initialized.");
         // add a function to the PayPal button to tokenize and invoke nonceHandler
         paypalButton.click(function() {
-          paypalInstance.tokenize(function (err, payload) {
+          paypalInstance.tokenize({
+            flow: "vault",
+            // amount: "10",
+            // currency: "USD",
+            enableShippingAddress: true,
+            }, function (err, payload) {
             if (err) {
               messenger.text(err.message + ".");
               console.log(JSON.stringify(err));
