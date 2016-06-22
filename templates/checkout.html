@@ -40,7 +40,7 @@
       <div id="postal-code" class="braintree-hosted-container form-element"></div>
     </p>
 
-    <button id="paypalButton" class="form-element">Pay with PayPal instead</button>
+    <button id="paypalButton" class="form-element" disabled="true">Pay with PayPal instead</button>
     <br/>
 
     <button id="submitter" class="form-element" disabled="true">Submit</button>
@@ -153,6 +153,9 @@
       braintree.paypal.create({
         client: braintreeClientInstance,
         flow: "vault",
+        // amount: "10",
+        // currency: "USD",
+        enableShippingAddress: true,
       }, function (err, paypalInstance) {
         // PayPal...
         if (err) {
@@ -160,6 +163,7 @@
           return;
         }
         // ...is good to go:
+        paypalButton.prop("disabled", false);
         console.log("PayPal has been initialized.");
         // add a function to the PayPal button to tokenize and invoke nonceHandler
         paypalButton.click(function() {

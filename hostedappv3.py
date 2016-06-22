@@ -19,11 +19,13 @@ self_signed_ssl_cert_key_path = "static/server.key"
 tls_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
 tls_context.load_cert_chain(self_signed_ssl_cert_path, self_signed_ssl_cert_key_path)
 
+
 @app.route('/', methods=["GET"])
 def get_client_token():
 	client_token = braintree.ClientToken.generate()
 	# return "Hello world, we have a client token: " + client_token
 	return render_template('checkout.html', client_token=client_token)
+
 
 @app.route('/create_transaction', methods=["POST"])
 def create_transaction():
@@ -48,6 +50,7 @@ def create_transaction():
 		return "Victory! Transaction ID: " + result.transaction.id
 	else:
 		return "Failure! Try again. " + result.message
+
 
 if __name__ == '__main__':
 	app.run('127.0.0.1', debug=True, port=5000, ssl_context=tls_context)
