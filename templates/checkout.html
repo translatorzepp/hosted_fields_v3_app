@@ -88,6 +88,21 @@
       });
     }
 
+    // Function to tokenize hosted fields to get a nonce
+    // then call nonceHander to submit it
+    function nonceGetterHF() {
+      messenger.text("Working...")
+      hostedFields.tokenize(function (err, payload) {
+        if (err) {
+          messenger.text(err.message + ".");
+          console.log(JSON.stringify(err));
+          return;
+        }
+        console.log(JSON.stringify(payload));
+        nonceHandler(payload.nonce, $("#amount").val());
+      });
+    }
+
     // Braintree Code:
     braintree.client.create({
       authorization: "{{ client_token }}"
@@ -136,21 +151,10 @@
         // ...is good to go:
         hostedFields = hostedFieldsInstance;
         console.log("Hosted fields have been initialized.");
-        // undisable the submit button, and add a function to it to tokenize and invoke nonceHandler
+        // undisable the submit button, and add nonceGetterHF to it
         // submitter.removeAttribute("disabled")
         submitter.prop("disabled", false);
-        submitter.click(function() {
-          messenger.text("Working...")
-          hostedFieldsInstance.tokenize(function (err, payload) {
-            if (err) {
-              messenger.text(err.message + ".");
-              console.log(JSON.stringify(err));
-              return;
-            }
-            console.log(JSON.stringify(payload));
-            nonceHandler(payload.nonce, $("#amount").val());
-          });
-        });
+        submitter.click(nonceGetterHF);
       });
       // Create PayPal:
       braintree.paypal.create({
