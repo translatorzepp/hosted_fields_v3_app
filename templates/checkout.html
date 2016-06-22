@@ -12,7 +12,6 @@
 
 <!-- https://checkout.paypal.com/pwpp/2.21.0/images/pay-with-paypal.png -->
 
-
 </head>
 
 <body>
@@ -59,6 +58,21 @@
 
     var deviceDataCollected = "This is not device data.";
 
+    // Function to tokenize hosted fields to get a nonce
+    // then call nonceHander to submit it
+    function nonceGetterHF() {
+      messenger.text("Working...")
+      hostedFields.tokenize(function (err, payload) {
+        if (err) {
+          messenger.text(err.message + ".");
+          console.log(JSON.stringify(err));
+          return;
+        }
+        console.log(JSON.stringify(payload));
+        nonceHandler(payload.nonce, $("#amount").val());
+      });
+    }
+    2
     // Function to collect transaction params, incl. the nonce,
     // post them to the server endpoint,
     // and retrieve and display results.
@@ -85,21 +99,6 @@
       .always(function(xhr, status) {
         console.log("Request made and completed.");
         messenger.text(output);
-      });
-    }
-
-    // Function to tokenize hosted fields to get a nonce
-    // then call nonceHander to submit it
-    function nonceGetterHF() {
-      messenger.text("Working...")
-      hostedFields.tokenize(function (err, payload) {
-        if (err) {
-          messenger.text(err.message + ".");
-          console.log(JSON.stringify(err));
-          return;
-        }
-        console.log(JSON.stringify(payload));
-        nonceHandler(payload.nonce, $("#amount").val());
       });
     }
 
@@ -130,6 +129,7 @@
         deviceDataCollected = data.deviceData;
         console.log("Device data captured: " + deviceDataCollected);
       });
+
       // Create Hosted Fields:
       braintree.hostedFields.create({
         client: braintreeClientInstance,
@@ -155,7 +155,12 @@
         // submitter.removeAttribute("disabled")
         submitter.prop("disabled", false);
         submitter.click(nonceGetterHF);
+        // add noncGetterHF to inputSubmitRequests (e.g. enter key pressed inside HF)
+        hostedFieldsInstance.on('inputSubmitRequest', function (event) {
+          nonceGetterHF()
+        });
       });
+
       // Create PayPal:
       braintree.paypal.create({
         client: braintreeClientInstance,
