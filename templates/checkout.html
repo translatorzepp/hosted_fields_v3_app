@@ -3,10 +3,10 @@
 
 <head>
 
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.9/js/client.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.9/js/hosted-fields.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.9/js/data-collector.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.9/js/paypal.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.10/js/client.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.10/js/hosted-fields.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.10/js/data-collector.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.0-beta.10/js/paypal.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
@@ -72,7 +72,7 @@
         nonceHandler(payload.nonce, $("#amount").val());
       });
     }
-    2
+    
     // Function to collect transaction params, incl. the nonce,
     // post them to the server endpoint,
     // and retrieve and display results.
@@ -158,6 +158,10 @@
         // add noncGetterHF to inputSubmitRequests (e.g. enter key pressed inside HF)
         hostedFieldsInstance.on('inputSubmitRequest', function (event) {
           nonceGetterHF()
+        });
+        // add event to get and display card type
+        hostedFieldsInstance.on('cardTypeChange', function (event) {
+          console.log(event.cards[0].niceType);
         });
       });
 

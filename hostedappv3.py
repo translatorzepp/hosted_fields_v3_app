@@ -19,6 +19,7 @@ self_signed_ssl_cert_key_path = "static/server.key"
 tls_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
 tls_context.load_cert_chain(self_signed_ssl_cert_path, self_signed_ssl_cert_key_path)
 
+transaction_url = 'https://sandbox.braintreegateway.com/merchants/' + merchant_id + '/transactions/'
 
 @app.route('/', methods=["GET"])
 def get_client_token():
@@ -45,11 +46,14 @@ def create_transaction():
 		},
 	})
 
-	# return "Victory! We got a nonce (" + nonce + ") and an amount (" + amount + ")!"
 	if result.is_success:
+		# return "Victory! We got a nonce (" + nonce + ") and an amount (" + amount + ")!"
 		return "Victory! Transaction ID: " + result.transaction.id
+		# created_transaction_id = result.transaction.id
+		# created_transaction_link = "'<a href='" + transaction_url + created_transaction_id + "'>" + created_transaction_id + "</a>'"
+		# return "Victory! Transaction ID: " + created_transaction_link
 	else:
-		return "Failure! Try again. " + result.message
+		return "Failure! Try again. \n" + result.message
 
 
 if __name__ == '__main__':
