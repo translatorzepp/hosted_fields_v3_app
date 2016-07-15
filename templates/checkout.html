@@ -23,6 +23,9 @@
     <div id="message" class="message form-element"></div>
     <br />
 
+    <!-- <a href='https://sandbox.braintreegateway.com/merchants/ryqy4yyw7m5bf92h/transactions/j7cz90s9'>j7cz90s9</a>
+ -->
+
     <p>
       <div class="form-element form-input">$<input id="amount" placeholder="Amount" style="width:210px"></div>
     </p>
@@ -54,9 +57,9 @@
     var messenger = $(".message");
     var paypalButton = $("#paypalButton");
 
-    var output = "No message.";
+    var output = "No message because nothing has happened.";
 
-    var deviceDataCollected = "This is not device data.";
+    var deviceDataCollected = "This is not device data because dataCollector hasn't run.";
 
     // Function to tokenize hosted fields to get a nonce
     // then call nonceHander to submit it
