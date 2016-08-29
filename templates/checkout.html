@@ -3,11 +3,13 @@
 
 <head>
 
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.10/js/client.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.10/js/hosted-fields.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.10/js/data-collector.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.0-beta.10/js/paypal.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.1/js/client.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.1/js/hosted-fields.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.1/js/paypal.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.0.1/js/data-collector.min.js"></script>
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
 <!-- https://checkout.paypal.com/pwpp/2.21.0/images/pay-with-paypal.png -->
@@ -44,23 +46,17 @@
 
     <button id="paypalButton" class="form-element" disabled="true">Pay with PayPal instead</button>
     <br/>
-
     <button id="submitter" class="form-element" disabled="true">Submit</button>
   </div>
-
 
   <script>
 
     var hostedFields;
-
     var submitter = $("#submitter");
     var messenger = $(".message");
     var paypalButton = $("#paypalButton");
-
     var output = "No message because nothing has happened.";
-
     var deviceDataCollected = "This is not device data because dataCollector hasn't run.";
-
     // Function to tokenize hosted fields to get a nonce
     // then call nonceHander to submit it
     function nonceGetterHF() {
@@ -75,18 +71,14 @@
         nonceHandler(payload.nonce, $("#amount").val());
       });
     }
-    
+
     // Function to collect transaction params, incl. the nonce,
     // post them to the server endpoint,
     // and retrieve and display results.
     function nonceHandler(nonce, amount) {
       $.ajax({
         url: "/create_transaction",
-        data: {
-          nonce: nonce,
-          amount: amount,
-          device_data: deviceDataCollected,
-        },
+        data: { nonce: nonce, amount: amount, device_data: deviceDataCollected, },
         type: "POST",
         dataType: "text",
       })
@@ -116,21 +108,24 @@
       }
       // ...is good to go.
       console.log("Braintree client created.");
+      
       // Create Data Collector:
       braintree.dataCollector.create({
-        kount: {
-          environment: 'sandbox',
-          paypal: true,
-        }
+        client: braintreeClientInstance,
+        kount: true,
+  		  paypal: true,
       }, function (err, data) {
-        if (err) {
-          console.log(JSON.stringify(err));
-          deviceDataCollected = "This is not device data because there was a problem: " + JSON.stringify(err);
-          return;
-        }
-        // Data collector is good to go:
-        deviceDataCollected = data.deviceData;
-        console.log("Device data captured: " + deviceDataCollected);
+          console.log("Device Data:");
+          console.log(err);
+          console.log(data);
+          if (err) {
+            console.log(JSON.stringify(err));
+            deviceDataCollected = "This is not device data because there was a problem: " + JSON.stringify(err);
+            return;
+          }
+          // Data collector is good to go:
+          deviceDataCollected = data.deviceData;
+          console.log("Device data captured: " + deviceDataCollected);
       });
 
       // Create Hosted Fields:
