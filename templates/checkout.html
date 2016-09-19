@@ -3,17 +3,17 @@
 
 <head>
 
-  <script src="https://js.braintreegateway.com/web/3.0.1/js/client.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.1/js/hosted-fields.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.1/js/paypal.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.0.1/js/data-collector.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.2.0/js/client.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.2.0/js/hosted-fields.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.2.0/js/paypal.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.2.0/js/data-collector.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.2.0/js/three-d-secure.min.js"></script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
   
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
 <!-- https://checkout.paypal.com/pwpp/2.21.0/images/pay-with-paypal.png -->
-
 </head>
 
 <body>
@@ -25,9 +25,10 @@
     <div id="message" class="message form-element"></div>
     <br />
 
+    <div id="threeds"></div>
+
     <!-- <a href='https://sandbox.braintreegateway.com/merchants/ryqy4yyw7m5bf92h/transactions/j7cz90s9'>j7cz90s9</a>
  -->
-
     <p>
       <div class="form-element form-input">$<input id="amount" placeholder="Amount" style="width:210px"></div>
     </p>
@@ -52,12 +53,18 @@
   <script>
 
     var hostedFields;
+    var threeDSecure;
+
     var submitter = $("#submitter");
     var messenger = $(".message");
     var paypalButton = $("#paypalButton");
+    var threeDSContainer = $(".threeds");
+
     var output = "No message because nothing has happened.";
     var deviceDataCollected = "This is not device data because dataCollector hasn't run.";
+
     // Function to tokenize hosted fields to get a nonce
+    // verify it with 3D Secure
     // then call nonceHander to submit it
     function nonceGetterHF() {
       messenger.text("Working...")
@@ -68,7 +75,27 @@
           return;
         }
         console.log(JSON.stringify(payload));
-        nonceHandler(payload.nonce, $("#amount").val());
+        threeDSecure.verifyCard({
+          amount: $("#amount").val(),
+          nonce: payload.nonce,
+          addFrame: function (err, iframe) {
+            if (err) {
+              console.log(JSON.stringify(err));
+              return;
+            }
+            my3DSContainer = document.createElement('div');
+            my3DSContainer.appendChild(iframe);
+            document.body.appendChild(my3DSContainer);
+          },
+          removeFrame: function () {
+            document.body.removeChild(my3DSContainer);
+          },
+        }, function(err, verification) {
+          if (err) {
+            console.log(JSON.stringify(err));
+          }
+          nonceHandler(verification.nonce, $("#amount").val());
+        });
       });
     }
 
@@ -116,8 +143,8 @@
   		  paypal: true,
       }, function (err, data) {
           console.log("Device Data:");
-          console.log(err);
-          console.log(data);
+          // console.log(err);
+          // console.log(data);
           if (err) {
             console.log(JSON.stringify(err));
             deviceDataCollected = "This is not device data because there was a problem: " + JSON.stringify(err);
@@ -195,9 +222,20 @@
 
       });
 
+  	  // Create 3DS:
+      braintree.threeDSecure.create({
+        client: braintreeClientInstance,
+      }, function (err, threeDSInstance) {
+        if (err) {
+          console.log(JSON.stringify(err));
+          return;
+        }
+        console.log("3D Secure has been initialized.");
+        threeDSecure = threeDSInstance;
+      });
+
     });
 
   </script>
-
 
 </body>

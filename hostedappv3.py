@@ -52,6 +52,6 @@ def create_transaction():
 
 
 if __name__ == '__main__':
-#	commenting out the run statement with the SSL context so as to not register as insecure.
-#	app.run('127.0.0.1', debug=True, port=5000, ssl_context=tls_context)
+#	comment out the run statement with the SSL context so as to not register as insecure.
+	#app.run('127.0.0.1', debug=True, port=5000, ssl_context=tls_context)
 	app.run('127.0.0.1', debug=True, port=5000)
