@@ -46,12 +46,18 @@ def create_transaction():
 
 	if result.is_success:
 		# return "Victory! We got a nonce (" + nonce + ") and an amount (" + amount + ")!"
-		return "Victory! Transaction ID: " + result.transaction.id
+		# return "Victory! Transaction ID: " + result.transaction.id
+                id = result.transaction.id
+                return 'Victory! Transaction: <a href="https://sandbox.braintreegateway.com/merchants/{0}/transactions/{1}" target="_blank">{1}</a>'.format(merchant_id, id)
+                # the code that renders this does not render html rn
 	else:
 		return "Failure! Try again. \n" + result.message
 
 
 if __name__ == '__main__':
-#	comment out the run statement with the SSL context so as to not register as insecure.
-	#app.run('127.0.0.1', debug=True, port=5000, ssl_context=tls_context)
-	app.run('127.0.0.1', debug=True, port=5000)
+	app.run(
+                '127.0.0.1',
+                debug=True,
+                port=5000,
+                ssl_context=tls_context #comment out to run w/out https
+        )

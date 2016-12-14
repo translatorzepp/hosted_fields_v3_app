@@ -3,14 +3,14 @@
 
 <head>
 
-  <script src="https://js.braintreegateway.com/web/3.2.0/js/client.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.2.0/js/hosted-fields.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.2.0/js/paypal.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.2.0/js/data-collector.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.2.0/js/three-d-secure.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.6.0/js/client.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.6.0/js/hosted-fields.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.6.0/js/paypal.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.6.0/js/data-collector.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.6.0/js/three-d-secure.min.js"></script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-  
+
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
 <!-- https://checkout.paypal.com/pwpp/2.21.0/images/pay-with-paypal.png -->
@@ -27,8 +27,6 @@
 
     <div id="threeds"></div>
 
-    <!-- <a href='https://sandbox.braintreegateway.com/merchants/ryqy4yyw7m5bf92h/transactions/j7cz90s9'>j7cz90s9</a>
- -->
     <p>
       <div class="form-element form-input">$<input id="amount" placeholder="Amount" style="width:210px"></div>
     </p>
@@ -36,14 +34,16 @@
       <div id="card-number" class="braintree-hosted-container form-element"></div>
     </p>
     <p>
-      <div id="expiration-date" class="braintree-hosted-container form-element"></div>    
+      <div id="expiration-date" class="braintree-hosted-container form-element"></div>
     </p>
     <p>
       <div id="cvv" class="braintree-hosted-container form-element"></div>
     </p>
+    <!--
     <p>
       <div id="postal-code" class="braintree-hosted-container form-element"></div>
     </p>
+    -->
 
     <button id="paypalButton" class="form-element" disabled="true">Pay with PayPal instead</button>
     <br/>
@@ -60,12 +60,14 @@
     var paypalButton = $("#paypalButton");
     var threeDSContainer = $(".threeds");
 
+    var ppInstance;
+
     var output = "No message because nothing has happened.";
     var deviceDataCollected = "This is not device data because dataCollector hasn't run.";
 
     // Function to tokenize hosted fields to get a nonce
     // verify it with 3D Secure
-    // then call nonceHander to submit it
+    // then call nonceHandler to submit it
     function nonceGetterHF() {
       messenger.text("Working...")
       hostedFields.tokenize(function (err, payload) {
@@ -103,6 +105,7 @@
     // post them to the server endpoint,
     // and retrieve and display results.
     function nonceHandler(nonce, amount) {
+      console.log("Nonce handling has begun...");
       $.ajax({
         url: "/create_transaction",
         data: { nonce: nonce, amount: amount, device_data: deviceDataCollected, },
@@ -135,7 +138,7 @@
       }
       // ...is good to go.
       console.log("Braintree client created.");
-      
+
       // Create Data Collector:
       braintree.dataCollector.create({
         client: braintreeClientInstance,
@@ -165,7 +168,7 @@
           number: {selector: "#card-number", placeholder: "Credit Card Number"},
           cvv: {selector: "#cvv", placeholder: "CVV"},
           expirationDate: {selector: "#expiration-date", placeholder: "MM/YY or MM/YYYY"},
-          postalCode: {selector: "#postal-code", placeholder: "Zip Code"},
+          //postalCode: {selector: "#postal-code", placeholder: "Zip Code"},
         },
       }, function (err, hostedFieldsInstance) {
         // Hosted Fields...
@@ -200,24 +203,29 @@
           return;
         }
         // ...is good to go:
+
+        ppInstance = paypalInstance;
+
         paypalButton.prop("disabled", false);
         console.log("PayPal has been initialized.");
         // add a function to the PayPal button to tokenize and invoke nonceHandler
         paypalButton.click(function() {
-          paypalInstance.tokenize({
-            flow: "vault",
-            // amount: "10",
-            // currency: "USD",
+          amount = $("#amount").val();
+          tokenizeReturnInstance = paypalInstance.tokenize({
+            flow: "checkout",
+            amount: amount,
+            currency: "USD",
             enableShippingAddress: true,
-            }, function (err, payload) {
+          }, function (err, payload) {
             if (err) {
               messenger.text(err.message + ".");
               console.log(JSON.stringify(err));
               return;
             }
             console.log(JSON.stringify(payload));
-            nonceHandler(payload.nonce, $("#amount").val());
+            nonceHandler(payload.nonce, amount);
           });
+          console.log(tokenizeReturnInstance);
         });
 
       });
