@@ -25,6 +25,9 @@ def get_client_token():
 	# return "Hello world, we have a client token: " + client_token
 	return render_template('checkout.html', client_token=client_token)
 
+@app.route('/print_client_token', methods=["GET"])
+def print_client_token():
+    return braintree.ClientToken.generate()
 
 @app.route('/create_transaction', methods=["POST"])
 def create_transaction():
@@ -59,5 +62,5 @@ if __name__ == '__main__':
                 '127.0.0.1',
                 debug=True,
                 port=5000,
-                ssl_context=tls_context #comment out to run w/out https
+                #ssl_context=tls_context #comment out to run w/out https
         )

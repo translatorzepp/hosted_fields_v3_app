@@ -63,7 +63,9 @@
     var ppInstance;
 
     var output = "No message because nothing has happened.";
-    var deviceDataCollected = "This is not device data because dataCollector hasn't run.";
+    var deviceDataCollected = "this is not device data because dataCollector hasn't run";
+
+    var nonce = "this is not a nonce";
 
     // Function to tokenize hosted fields to get a nonce
     // verify it with 3D Secure
@@ -77,31 +79,37 @@
           return;
         }
         console.log(JSON.stringify(payload));
-        threeDSecure.verifyCard({
-          amount: $("#amount").val(),
-          nonce: payload.nonce,
-          addFrame: function (err, iframe) {
+        if (threeDSecure != null) {
+          threeDSecure.verifyCard({
+            amount: $("#amount").val(),
+            nonce: payload.nonce,
+            addFrame: function (err, iframe) {
+              if (err) {
+                console.log(JSON.stringify(err));
+                return;
+              }
+              my3DSContainer = document.createElement('div');
+              my3DSContainer.appendChild(iframe);
+              document.body.appendChild(my3DSContainer);
+            },
+            removeFrame: function () {
+              document.body.removeChild(my3DSContainer);
+            },
+          }, function(err, verification) {
             if (err) {
               console.log(JSON.stringify(err));
               return;
             }
-            my3DSContainer = document.createElement('div');
-            my3DSContainer.appendChild(iframe);
-            document.body.appendChild(my3DSContainer);
-          },
-          removeFrame: function () {
-            document.body.removeChild(my3DSContainer);
-          },
-        }, function(err, verification) {
-          if (err) {
-            console.log(JSON.stringify(err));
-          }
-          nonceHandler(verification.nonce, $("#amount").val());
-        });
+            nonce = verification.nonce;
+          });
+        } else {
+          nonce = payload.nonce;
+        }
+        nonceHandler(nonce, $("#amount").val());
       });
     }
 
-    // Function to collect transaction params, incl. the nonce,
+    // Function to groups transaction params, incl. the nonce,
     // post them to the server endpoint,
     // and retrieve and display results.
     function nonceHandler(nonce, amount) {
@@ -145,9 +153,6 @@
         kount: true,
   		  paypal: true,
       }, function (err, data) {
-          console.log("Device Data:");
-          // console.log(err);
-          // console.log(data);
           if (err) {
             console.log(JSON.stringify(err));
             deviceDataCollected = "This is not device data because there was a problem: " + JSON.stringify(err);
@@ -210,24 +215,34 @@
         console.log("PayPal has been initialized.");
         // add a function to the PayPal button to tokenize and invoke nonceHandler
         paypalButton.click(function() {
-          amount = $("#amount").val();
-          tokenizeReturnInstance = paypalInstance.tokenize({
-            flow: "checkout",
-            amount: amount,
-            currency: "USD",
-            enableShippingAddress: true,
-          }, function (err, payload) {
-            if (err) {
-              messenger.text(err.message + ".");
-              console.log(JSON.stringify(err));
-              return;
-            }
-            console.log(JSON.stringify(payload));
-            nonceHandler(payload.nonce, amount);
-          });
-          console.log(tokenizeReturnInstance);
-        });
 
+          amount = $("#amount").val();
+          validAmount = (!isNaN(amount) && amount !== "")
+          console.log("Valid amount? " + validAmount);
+
+          if (validAmount) {
+            tokenizeReturnInstance = paypalInstance.tokenize({
+              flow: "checkout",
+              amount: amount,
+              currency: "USD",
+              enableShippingAddress: true,
+              useraction: "commit",
+            }, function (err, payload) {
+              if (err) {
+                messenger.text(err.message);
+                console.log(JSON.stringify(err));
+                return;
+              }
+              console.log(JSON.stringify(payload));
+              nonce = payload.nonce;
+              nonceHandler(nonce, amount);
+            });
+            console.log(tokenizeReturnInstance);
+          } else {
+            messenger.text("Please enter a valid amount.")
+          }
+
+        });
       });
 
   	  // Create 3DS:
