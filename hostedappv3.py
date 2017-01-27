@@ -21,9 +21,8 @@ tls_context.load_cert_chain(self_signed_ssl_cert_path, self_signed_ssl_cert_key_
 
 @app.route('/', methods=["GET"])
 def get_client_token():
-	client_token = braintree.ClientToken.generate()
-	# return "Hello world, we have a client token: " + client_token
-	return render_template('checkout.html', client_token=client_token)
+    client_token = braintree.ClientToken.generate()
+    return render_template('checkout.html', client_token=client_token)
 
 @app.route('/print_client_token', methods=["GET"])
 def print_client_token():
@@ -31,36 +30,37 @@ def print_client_token():
 
 @app.route('/create_transaction', methods=["POST"])
 def create_transaction():
-	nonce = request.form["nonce"]
-	amount = request.form["amount"]
-	devdat = request.form["device_data"]
+    nonce = request.form["nonce"]
+    amount = request.form["amount"]
+    devdat = request.form["device_data"]
 
-	result = braintree.Transaction.sale({
-		"amount": amount,
-		"payment_method_nonce": nonce,
-		"options": {
-			"submit_for_settlement": True
-		},
-		"device_data": devdat,
-		"descriptor": {
-			"name": "HostedFields*JSv3",
-		},
-	})
+    result = braintree.Transaction.sale({
+        "amount": amount,
+        "payment_method_nonce": nonce,
+        "options": {
+            "submit_for_settlement": True
+        },
+        "device_data": devdat,
+        "descriptor": {
+            "name": "HostedFields*JSv3",
+        },
+    })
 
-	if result.is_success:
-		# return "Victory! We got a nonce (" + nonce + ") and an amount (" + amount + ")!"
-		# return "Victory! Transaction ID: " + result.transaction.id
-                id = result.transaction.id
-                return 'Victory! Transaction: <a href="https://sandbox.braintreegateway.com/merchants/{0}/transactions/{1}" target="_blank">{1}</a>'.format(merchant_id, id)
-                # the code that renders this does not render html rn
-	else:
-		return "Failure! Try again. \n" + result.message
+
+    if result.is_success:
+        # return "Victory! We got a nonce (" + nonce + ") and an amount (" + amount + ")!"
+        trans_id = result.transaction.id
+        # return "Victory! Transaction ID: " + trans_id
+        return 'Victory! Transaction: <a href="https://sandbox.braintreegateway.com/merchants/{0}/transactions/{1}" target="_blank">{1}</a>'.format(merchant_id, trans_id)
+        # the code that renders this does not render html rn
+    else:
+	return "Failure! Try again. \n" + result.message
 
 
 if __name__ == '__main__':
-	app.run(
-                '127.0.0.1',
-                debug=True,
-                port=5000,
-                #ssl_context=tls_context #comment out to run w/out https
-        )
+    app.run(
+        '127.0.0.1',
+        debug=True,
+        port=5000,
+        #ssl_context=tls_context #comment out to run w/out https
+    )
