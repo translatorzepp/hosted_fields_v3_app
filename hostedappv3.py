@@ -54,7 +54,7 @@ def create_transaction():
         return 'Victory! Transaction: <a href="https://sandbox.braintreegateway.com/merchants/{0}/transactions/{1}" target="_blank">{1}</a>'.format(merchant_id, trans_id)
         # the code that renders this does not render html rn
     else:
-	return "Failure! Try again. \n" + result.message
+	return 'Failure! Try again.\n{0}'.format(result.message)
 
 
 if __name__ == '__main__':
