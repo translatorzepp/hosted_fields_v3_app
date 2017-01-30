@@ -222,9 +222,10 @@
 
           if (validAmount) {
             tokenizeReturnInstance = paypalInstance.tokenize({
-              flow: "checkout",
-              amount: amount,
-              currency: "USD",
+              flow: "vault",
+              //flow: "checkout",
+              //amount: amount,
+              //currency: "USD",
               enableShippingAddress: true,
               useraction: "commit",
             }, function (err, payload) {
