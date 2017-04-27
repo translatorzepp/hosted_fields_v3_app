@@ -62,7 +62,7 @@ def create_transaction():
 
 if __name__ == '__main__':
     app.run(
-        '127.0.0.1',
+        host='127.0.0.1',
         #host='0.0.0.0', #use this to make server available to anyone on network, on your machine's IP address
         debug=True,
         port=5000,
