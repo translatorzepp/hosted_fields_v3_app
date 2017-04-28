@@ -3,11 +3,11 @@
 
 <head>
 
-  <script src="https://js.braintreegateway.com/web/3.11.1/js/client.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.11.1/js/hosted-fields.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.11.1/js/paypal.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.11.1/js/data-collector.min.js"></script>
-  <script src="https://js.braintreegateway.com/web/3.11.1/js/three-d-secure.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.14.0/js/client.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.14.0/js/hosted-fields.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.14.0/js/paypal.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.14.0/js/data-collector.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.14.0/js/three-d-secure.min.js"></script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
@@ -198,7 +198,7 @@
           console.log(event.cards[0].niceType);
         });
         hostedFieldsInstance.on('validityChange', function (event) {
-          alert('validity change fired');
+          console.log('validity change fired');
         });
       });
 
