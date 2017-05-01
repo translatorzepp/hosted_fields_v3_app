@@ -67,6 +67,8 @@
 
     var nonce = "this is not a nonce";
 
+    var isAndroid = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
+
     // Function to tokenize hosted fields to get a nonce
     // verify it with 3D Secure
     // then call nonceHandler to submit it
@@ -136,6 +138,7 @@
       });
     }
 
+
     // Braintree Code:
     braintree.client.create({
       authorization: "{{ client_token }}"
@@ -171,9 +174,9 @@
           "input": {"font-family": "monospace"},
         },
         fields: {
-          number: {selector: "#card-number", placeholder: "Credit Card Number"},
+          number: {selector: "#card-number", placeholder: "Credit Card Number", formatInput: !isAndroid},
           cvv: {selector: "#cvv", placeholder: "CVV"},
-          expirationDate: {selector: "#expiration-date", placeholder: "MM/YY or MM/YYYY"},
+          expirationDate: {selector: "#expiration-date", placeholder: "MM/YY or MM/YYYY", formatInput: !isAndroid},
           //postalCode: {selector: "#postal-code", placeholder: "Zip Code"},
         },
       }, function (err, hostedFieldsInstance) {
